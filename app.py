@@ -91,7 +91,6 @@ def restore_schema_from_qdrant(project_id: str) -> Dict[str, Any]:
     """Helper khôi phục lại db_schema từ Qdrant Payload khi RAM bị trống sau restart server"""
     db_schema = {}
     try:
-        # BẮT BUỘC truyền project_id để khởi tạo đúng VectorService cho project đó
         vector_service = VectorService(project_id=project_id)
         scroll_res = vector_service.client.scroll(
             collection_name=vector_service.schema_collection,
@@ -99,23 +98,30 @@ def restore_schema_from_qdrant(project_id: str) -> Dict[str, Any]:
             with_payload=True
         )
         points = scroll_res[0] if scroll_res else []
+        
         for pt in points:
             payload = pt.payload or {}
-            full_name = payload.get("full_name") or payload.get("table_name") or ""
-            # Chuẩn hóa lấy short_name (ví dụ: 'jobs' từ 'public.jobs')
-            table_name = payload.get("table_name") or (full_name.split('.')[-1] if '.' in full_name else full_name)
+            table_name = payload.get("table_name") or ""
+            full_name = payload.get("full_name") or table_name
+            short_name = table_name.split('.')[-1] if '.' in table_name else table_name
             
-            if table_name:
-                db_schema[table_name] = {
-                    "short_name": table_name,
-                    "full_name": full_name or table_name,
+            if short_name:
+                schema_entry = {
+                    "short_name": short_name,
+                    "full_name": full_name,
                     "description": payload.get("description", ""),
                     "columns": payload.get("columns", []),
                     "foreign_keys": payload.get("foreign_keys", [])
                 }
-        logging.info(f"✅ [RESTORE] Đã khôi phục {len(db_schema)} bảng từ Qdrant cho project '{project_id}': {list(db_schema.keys())}")
+                # Lưu BẮT BUỘC cả short_name và full_name để tránh lỗi lệch Key khi SchemaService lookup!
+                db_schema[short_name] = schema_entry
+                if full_name and full_name != short_name:
+                    db_schema[full_name] = schema_entry
+
+        logging.info(f"✅ [RESTORE SUCCESS] Đã khôi phục {len(db_schema)} bảng cho project '{project_id}': {list(db_schema.keys())}")
     except Exception as e:
-        logging.warning(f"❌ [RESTORE FAILED] Lỗi khôi phục schema từ Qdrant cho {project_id}: {e}")
+        logging.warning(f"❌ [RESTORE FAILED] Lỗi khôi phục schema từ Qdrant cho '{project_id}': {e}")
+        
     return db_schema
 
 
@@ -289,18 +295,19 @@ async def delete_project(project_id: str):
 async def handle_sql_mode(request: QueryRequest):
     logging.info(f"[handle_sql_mode] Request: query={request.query}, project_id={request.project_id}")
 
-    cached_ids = getattr(app.state, "existing_project_ids", set())
     req_project_id = request.project_id
 
+    if not req_project_id:
+        raise HTTPException(status_code=400, detail="Missing project_id in request")
+
     # 1. Nếu project có trong RAM -> Lấy dùng ngay
-    if req_project_id and req_project_id in projects:
-        project_data = projects[req_project_id]
-        sql_graph = project_data["graph"]
+    if req_project_id in projects:
+        sql_graph = projects[req_project_id]["graph"]
         project_id = req_project_id
 
-    # 2. Nếu RAM rỗng (Do server vừa restart) -> Phục hồi từ Qdrant
-    elif req_project_id and req_project_id in cached_ids:
-        logging.info(f"[handle_sql_mode] Phục hồi Schema từ Qdrant cho project_id: {req_project_id}")
+    # 2. Nếu RAM rỗng (Do server vừa restart / gập máy) -> Luôn thử restore từ Qdrant
+    else:
+        logging.info(f"[handle_sql_mode] RAM rỗng. Đang thử khôi phục Schema từ Qdrant cho project_id: {req_project_id}")
         db_schema = restore_schema_from_qdrant(req_project_id)
         
         if db_schema:
@@ -314,25 +321,21 @@ async def handle_sql_mode(request: QueryRequest):
                 "graph": sql_graph,
                 "metadata": {"source": "qdrant_storage", "status": "restored"}
             }
+            if hasattr(app.state, "existing_project_ids"):
+                app.state.existing_project_ids.add(req_project_id)
             project_id = req_project_id
         else:
-            # Nếu Qdrant trống, trả 404 để Backend NestJS biết mà tự động re-upload lại Schema
-            logging.error(f"❌ Project {req_project_id} bị rỗng trong Qdrant. Yêu cầu Backend re-upload.")
+            # Nếu Qdrant thực sự không có data -> Trả 404 để NestJS bắt lỗi và tự re-upload
+            logging.error(f"❌ Project {req_project_id} không có dữ liệu trên Qdrant.")
             raise HTTPException(
                 status_code=404,
-                detail=f"Project {req_project_id} schema is empty. Please re-upload schema."
+                detail=f"Project {req_project_id} not found in Qdrant storage."
             )
-    else:
-        # Tuyệt đối không tự ý chạy fallback hay clear_collections nữa
-        raise HTTPException(
-            status_code=404,
-            detail=f"Project {req_project_id} not found."
-        )
 
     logging.info(f"[handle_sql_mode] Bắt đầu sinh SQL cho query={request.query}")
     try:
         result = sql_graph.run(request.query, prompt_type=request.prompt_type)
-        logging.info(f"[handle_sql_mode] Đã sinh SQL: {result.get('generated_sql')}")
+        logging.info(f"[handle_sql_mode] Đã sinh SQL thành công: {result.get('generated_sql')}")
     except Exception as e:
         logging.error(f"[handle_sql_mode] Lỗi khi sinh SQL: {e}")
         raise
@@ -348,9 +351,7 @@ async def handle_sql_mode(request: QueryRequest):
             "metadata": {
                 "use_schema_rag": result.get("use_schema_rag", False),
                 "relevant_tables": result.get("relevant_tables", []),
-                "schema_analysis": result.get("schema_analysis", {}),
-                "similar_queries_count": len(result.get("similar_queries", [])),
-                "timings_ms": result.get("timings_ms", [])
+                "schema_analysis": result.get("schema_analysis", {})
             }
         }
     )

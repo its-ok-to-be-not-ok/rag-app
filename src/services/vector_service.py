@@ -217,7 +217,7 @@ class VectorService:
             print(f"Error clearing points: {e}")
     
     def get_all_project_ids(self) -> List[str]:
-        """Lấy danh sách project_id chuẩn xác từ các collection"""
+        """Lấy danh sách project_id chuẩn xác từ Qdrant, không bỏ sót ID nào"""
         try:
             collections = self.client.get_collections().collections
             project_ids = set()
@@ -229,27 +229,35 @@ class VectorService:
             for col in collections:
                 c_name = col.name
                 if c_name.startswith(prefix_schema):
-                    pid = c_name[len(prefix_schema):]
+                    pid = c_name[len(prefix_schema):].strip()
                     if pid: project_ids.add(pid)
                 elif c_name.startswith(prefix_query) and not c_name.startswith(f"{base_name}_schema"):
-                    pid = c_name[len(prefix_query):]
+                    pid = c_name[len(prefix_query):].strip()
                     if pid: project_ids.add(pid)
             
             return sorted(list(project_ids))
         except Exception as e:
             print(f"Error in get_all_project_ids: {e}")
             return []
-    
+
     def delete_project_collections(self, project_id: str):
-        query_collection = f"{settings.QDRANT_COLLECTION}_{project_id}"
-        schema_collection = f"{settings.QDRANT_COLLECTION}_schema_{project_id}"
+        """Xóa an toàn collection của project_id, chống xóa nhầm collection gốc"""
+        if not project_id or not project_id.strip():
+            print("⚠️ Bỏ qua lệnh xóa do project_id bị rỗng!")
+            return
+
+        clean_pid = project_id.strip()
+        query_collection = f"{settings.QDRANT_COLLECTION}_{clean_pid}"
+        schema_collection = f"{settings.QDRANT_COLLECTION}_schema_{clean_pid}"
         
         try:
             self.client.delete_collection(query_collection)
+            print(f"✅ Deleted collection {query_collection}")
         except Exception as e:
-            print(f"Error deleting query collection: {e}")
+            print(f"Error deleting query collection {query_collection}: {e}")
         
         try:
             self.client.delete_collection(schema_collection)
+            print(f"✅ Deleted collection {schema_collection}")
         except Exception as e:
-            print(f"Error deleting schema collection: {e}")
+            print(f"Error deleting schema collection {schema_collection}: {e}")
