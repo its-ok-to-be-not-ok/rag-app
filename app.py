@@ -71,8 +71,6 @@ app.add_middleware(
 
 parser = AutoSchemaParser()
 schema_service = SchemaService()
-
-# Store multiple projects in RAM: {project_id: {"schema": db_schema, "graph": sql_graph, "metadata": {...}}}
 projects: Dict[str, Dict] = {}
 
 class QueryRequest(BaseModel):
@@ -200,12 +198,12 @@ async def upload_schema(file: UploadFile = File(...)):
 async def list_projects():
     try:
         project_list = []
-        cached_ids = getattr(app.state, "existing_project_ids", set())
+        # cached_ids = getattr(app.state, "existing_project_ids", set())
         
-        if not cached_ids:
-            vector_service = VectorService()
-            cached_ids = set(vector_service.get_all_project_ids())
-            app.state.existing_project_ids = cached_ids
+        # if not cached_ids:
+        vector_service = VectorService()
+        cached_ids = set(vector_service.get_all_project_ids())
+        app.state.existing_project_ids = cached_ids
 
         for project_id in sorted(list(cached_ids)):
             metadata = projects.get(project_id, {}).get("metadata", {
@@ -304,8 +302,6 @@ async def handle_sql_mode(request: QueryRequest):
     if req_project_id in projects:
         sql_graph = projects[req_project_id]["graph"]
         project_id = req_project_id
-
-    # 2. Nếu RAM rỗng (Do server vừa restart / gập máy) -> Luôn thử restore từ Qdrant
     else:
         logging.info(f"[handle_sql_mode] RAM rỗng. Đang thử khôi phục Schema từ Qdrant cho project_id: {req_project_id}")
         db_schema = restore_schema_from_qdrant(req_project_id)
