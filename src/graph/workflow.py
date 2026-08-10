@@ -81,6 +81,5 @@ class SQLGeneratorGraph:
         return result
     
     def index_schema(self):
-        if self.use_schema_rag:
-            self.vector_service.index_schema(self.db_schema)
+        self.vector_service.index_schema(self.db_schema)
 
