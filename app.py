@@ -155,10 +155,7 @@ async def upload_schema(file: UploadFile = File(...)):
             schema_word_threshold=settings.SCHEMA_WORD_THRESHOLD,
             project_id=project_id
         )
-        
-        if sql_graph.use_schema_rag:
-            # CHỈ INDEX SCHEMA, TUYỆT ĐỐI KHÔNG GỌI clear_collections() TÙY TIỆN!
-            sql_graph.index_schema()
+        sql_graph.index_schema()
         
         projects[project_id] = {
             "schema": db_schema,
