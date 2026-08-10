@@ -2,19 +2,14 @@ from typing import Dict, List, Any, Optional
 import json
 import re
 
-
 class AutoSchemaParser:
     
     def parse_schema_file(self, file_path: str) -> Dict:
-        with open(file_path, 'r') as f:
+        with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        
         return self.parse_schema_data(data)
     
     def parse_schema_data(self, data: Any) -> Dict:
-        """
-        Parse schema data directly (not from file)
-        """
         if isinstance(data, list):
             return self._parse_array_schema(data)
         elif isinstance(data, dict):
@@ -24,26 +19,21 @@ class AutoSchemaParser:
     
     def _parse_array_schema(self, data: List[Dict]) -> Dict:
         tables = {}
-        
         for item in data:
             if not isinstance(item, dict):
                 continue
-            
             table_info = self._auto_extract_table(item)
             if table_info:
                 tables[table_info['short_name']] = table_info
-        
         return tables
     
     def _parse_object_schema(self, data: Dict) -> Dict:
         tables = {}
-        
         for key, value in data.items():
             if isinstance(value, dict):
                 table_info = self._auto_extract_table(value)
                 if table_info:
                     tables[table_info['short_name']] = table_info
-        
         return tables
     
     def _auto_extract_table(self, item: Dict) -> Optional[Dict]:
@@ -66,7 +56,6 @@ class AutoSchemaParser:
     
     def _find_table_name(self, item: Dict) -> Optional[str]:
         possible_keys = ['name', 'table_name', 'tableName', 'table', 'Table', 'NAME']
-        
         for key in possible_keys:
             if key in item and item[key]:
                 return str(item[key])
@@ -85,7 +74,6 @@ class AutoSchemaParser:
     
     def _auto_extract_columns(self, item: Dict) -> List[str]:
         columns = []
-        
         possible_keys = ['columns', 'fields', 'attributes', 'Columns', 'COLUMNS']
         
         columns_data = None
@@ -141,41 +129,32 @@ class AutoSchemaParser:
     def _auto_extract_foreign_keys(self, item: Dict) -> List[str]:
         foreign_keys = []
         
-        possible_keys = ['constraint', 'constraints', 'foreignKeys', 'foreign_keys', 'relations']
-        
-        constraints_data = None
-        for key in possible_keys:
-            if key in item and isinstance(item[key], list):
-                constraints_data = item[key]
-                break
-        
-        if not constraints_data:
-            return foreign_keys
-        
-        for constraint in constraints_data:
-            if not isinstance(constraint, dict):
-                continue
-            
-            fk_str = self._format_foreign_key(constraint)
-            if fk_str:
-                foreign_keys.append(fk_str)
-        
+        # 1. Đọc dạng mảng object 'foreignKeys' (system_schema.json)
+        fk_list = item.get('foreignKeys') or item.get('foreign_keys') or item.get('relations')
+        if isinstance(fk_list, list):
+            for fk in fk_list:
+                if isinstance(fk, dict):
+                    from_col = fk.get('fromColumn') or fk.get('column')
+                    to_table = fk.get('toTable') or fk.get('referenced_table')
+                    to_col = fk.get('toColumn') or fk.get('referenced_column')
+                    if from_col and to_table and to_col:
+                        to_table_short = self._extract_short_name(to_table)
+                        foreign_keys.append(f"{from_col} -> {to_table_short}.{to_col}")
+
+        # 2. Đọc dạng mảng object 'constraint' (data_schema.json)
+        constraints = item.get('constraint') or item.get('constraints')
+        if isinstance(constraints, list):
+            for c in constraints:
+                if isinstance(c, dict):
+                    c_type = str(c.get('constraintType', '')).upper()
+                    if 'FOREIGN' in c_type or 'FK' in c_type:
+                        fk_str = self._format_foreign_key(c)
+                        if fk_str:
+                            foreign_keys.append(fk_str)
+                            
         return foreign_keys
     
     def _format_foreign_key(self, constraint: Dict) -> Optional[str]:
-        type_keys = ['constraintType', 'constraint_type', 'type', 'kind']
-        
-        is_foreign_key = False
-        for key in type_keys:
-            if key in constraint:
-                value = str(constraint[key]).upper()
-                if 'FOREIGN' in value or 'FK' in value:
-                    is_foreign_key = True
-                    break
-        
-        if not is_foreign_key:
-            return None
-        
         col_keys = ['constraintColumn', 'column', 'from_column', 'fromColumn']
         ref_table_keys = ['constraintedTable', 'referenced_table', 'refTable', 'toTable']
         ref_col_keys = ['constraintedColumn', 'referenced_column', 'refColumn', 'toColumn']
@@ -206,33 +185,15 @@ class AutoSchemaParser:
     
     def _auto_generate_description(self, item: Dict, table_name: str) -> str:
         desc_keys = ['description', 'desc', 'comment', 'remarks', 'summary']
-        
         for key in desc_keys:
             if key in item and item[key]:
                 return str(item[key])
-        
         return self._infer_description_from_name(table_name)
     
     def _infer_description_from_name(self, table_name: str) -> str:
         words = re.split(r'[_\-\s]+', table_name.lower())
-        
         words = [w for w in words if w and w not in ['public', 'private', 'dbo']]
-        
         if not words:
             return f"Bảng {table_name}"
-        
         readable_name = ' '.join(words)
-        
         return f"Bảng {readable_name}"
-    
-    def format_schema(self, db_schema: Dict) -> str:
-        lines = []
-        for table, info in db_schema.items():
-            lines.append(f"Table: {info.get('full_name', table)}")
-            lines.append(f"Columns: {', '.join(info['columns'])}")
-            lines.append(f"Description: {info.get('description', 'N/A')}")
-            if info.get('foreign_keys'):
-                lines.append(f"Foreign Keys: {', '.join(info['foreign_keys'])}")
-            lines.append("")
-        return "\n".join(lines)
-

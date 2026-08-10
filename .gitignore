@@ -27,3 +27,4 @@ __pycache__/
 # Vector DB & Local Models (nếu có sinh ra local)
 qdrant/
 models/
+upload_model

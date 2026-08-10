@@ -5,7 +5,6 @@ from qdrant_client.models import PointStruct, Distance, VectorParams
 from langchain_openai import OpenAIEmbeddings
 from ..config.settings import settings
 
-
 class VectorService:
     def __init__(self, project_id: str = None):
         self.client = QdrantClient(
@@ -46,8 +45,6 @@ class VectorService:
     
     def search_similar_queries(self, question: str, limit: int = 10) -> List[Dict]:
         question_vector = self.embeddings.embed_query(question)
-
-        # Fetch more results to improve diversity, then deduplicate by question
         fetch_limit = max(limit * 5, 10)
         search_result = self.client.search(
             collection_name=self.query_collection,
@@ -74,8 +71,6 @@ class VectorService:
     
     def search_relevant_tables(self, question: str, limit: int = 5) -> List[Dict]:
         question_vector = self.embeddings.embed_query(question)
-
-        # Fetch more and deduplicate by table_name to avoid repeated entries
         fetch_limit = max(limit * 5, 10)
         search_result = self.client.search(
             collection_name=self.schema_collection,
@@ -104,8 +99,6 @@ class VectorService:
     
     def add_query(self, question: str, sql: str):
         vector = self.embeddings.embed_query(question)
-
-        # Use deterministic ID to avoid duplicate inserts across runs
         stable_int_id = int(hashlib.md5(question.encode("utf-8")).hexdigest()[:12], 16)
 
         point = PointStruct(
@@ -153,14 +146,11 @@ class VectorService:
                         "columns": [],
                         "foreign_keys": []
                     }
-                
                 elif line.startswith('Columns:'):
                     cols = line.split('Columns:')[1].strip().split(',')
                     current_info["columns"] = [c.strip() for c in cols]
-                
                 elif line.startswith('Description:'):
                     current_info["description"] = line.split('Description:')[1].strip()
-                
                 elif line.startswith('Foreign Keys:'):
                     fks = line.split('Foreign Keys:')[1].strip().split(',')
                     current_info["foreign_keys"] = [fk.strip() for fk in fks]
@@ -191,6 +181,7 @@ class VectorService:
                 text_for_embedding = f"{table_name} {info.get('description', '')} {' '.join(info.get('columns', []))}"
                 vector = self.embeddings.embed_query(text_for_embedding)
                 
+                # Tạo ID cố định bằng MD5 theo tên bảng để upsert tự động ghi đè
                 stable_int_id = int(hashlib.md5(table_name.encode("utf-8")).hexdigest()[:12], 16)
                 point = PointStruct(
                     id=stable_int_id,
@@ -214,81 +205,51 @@ class VectorService:
             )
     
     def clear_collections(self):
-        """Clear all data from both collections"""
+        """Chỉ xóa points bên trong collection, KHÔNG XÓA VĨNH VIỄN COLLECTION"""
         try:
-            self.client.delete_collection(self.query_collection)
-            self.client.delete_collection(self.schema_collection)
-            print("Cleared existing collections")
+            from qdrant_client.models import Filter
+            self.client.delete(
+                collection_name=self.schema_collection,
+                points_selector=Filter()
+            )
+            print(f"--> [CLEARED POINTS] Cleared points inside {self.schema_collection}")
         except Exception as e:
-            print(f"Error clearing collections: {e}")
-        
-        # Recreate collections
-        self._initialize_collections()
-        print("Recreated collections")
-    
-    def clear_query_collection(self):
-        """Clear only the query collection"""
-        try:
-            self.client.delete_collection(self.query_collection)
-            print("Cleared query collection")
-        except Exception as e:
-            print(f"Error clearing query collection: {e}")
-        
-        # Recreate collection
-        self.client.create_collection(
-            collection_name=self.query_collection,
-            vectors_config=VectorParams(size=1536, distance=Distance.COSINE)
-        )
-        print("Recreated query collection")
-    
-    def clear_schema_collection(self):
-        """Clear only the schema collection"""
-        try:
-            self.client.delete_collection(self.schema_collection)
-            print("Cleared schema collection")
-        except Exception as e:
-            print(f"Error clearing schema collection: {e}")
-        
-        # Recreate collection
-        self.client.create_collection(
-            collection_name=self.schema_collection,
-            vectors_config=VectorParams(size=1536, distance=Distance.COSINE)
-        )
-        print("Recreated schema collection")
+            print(f"Error clearing points: {e}")
     
     def get_all_project_ids(self) -> List[str]:
-        """Get all project IDs from collections"""
-        collections = self.client.get_collections().collections
-        project_ids = set()
-        
-        base_name = settings.QDRANT_COLLECTION
-        for col in collections:
-            # Extract project_id from collection names like "queries_proj_xxx" or "queries_schema_proj_xxx"
-            if col.name.startswith(f"{base_name}_") and not col.name.startswith(f"{base_name}_schema_"):
-                # Format: queries_<project_id>
-                project_id = col.name[len(base_name) + 1:]
-                project_ids.add(project_id)
-            elif col.name.startswith(f"{base_name}_schema_"):
-                # Format: queries_schema_<project_id>
-                project_id = col.name[len(f"{base_name}_schema_"):]
-                project_ids.add(project_id)
-        
-        return sorted(list(project_ids))
+        """Lấy danh sách project_id chuẩn xác từ các collection"""
+        try:
+            collections = self.client.get_collections().collections
+            project_ids = set()
+            
+            base_name = settings.QDRANT_COLLECTION # 'queries'
+            prefix_schema = f"{base_name}_schema_"
+            prefix_query = f"{base_name}_"
+            
+            for col in collections:
+                c_name = col.name
+                if c_name.startswith(prefix_schema):
+                    pid = c_name[len(prefix_schema):]
+                    if pid: project_ids.add(pid)
+                elif c_name.startswith(prefix_query) and not c_name.startswith(f"{base_name}_schema"):
+                    pid = c_name[len(prefix_query):]
+                    if pid: project_ids.add(pid)
+            
+            return sorted(list(project_ids))
+        except Exception as e:
+            print(f"Error in get_all_project_ids: {e}")
+            return []
     
     def delete_project_collections(self, project_id: str):
-        """Delete all collections for a specific project"""
         query_collection = f"{settings.QDRANT_COLLECTION}_{project_id}"
         schema_collection = f"{settings.QDRANT_COLLECTION}_schema_{project_id}"
         
         try:
             self.client.delete_collection(query_collection)
-            print(f"Deleted query collection for project {project_id}")
         except Exception as e:
             print(f"Error deleting query collection: {e}")
         
         try:
             self.client.delete_collection(schema_collection)
-            print(f"Deleted schema collection for project {project_id}")
         except Exception as e:
             print(f"Error deleting schema collection: {e}")
-
