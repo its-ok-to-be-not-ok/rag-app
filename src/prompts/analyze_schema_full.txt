@@ -1,0 +1,47 @@
+Phân tích câu hỏi và xác định bảng cần query trong database.
+
+Câu hỏi: {question}
+
+Database Schema (toàn bộ):
+{schema_context}
+
+Nhiệm vụ QUAN TRỌNG:
+1. **Xác định bảng chính xác** - Đọc kỹ câu hỏi để chọn đúng bảng chứa data cần thiết
+   - VD: "consumption" data thường ở bảng yearmonth/transactions, không phải bảng customers
+   - VD: thông tin customer demographics ở bảng customers/clients
+   
+2. **Phân tích data types và formats** - Đặc biệt chú ý:
+   - Date formats: YYYYMM (string) vs YYYY-MM-DD (date) vs timestamp
+   - Numeric vs String columns
+   - Currency/Amount fields
+   
+3. **Xác định logic aggregation**:
+   - Tìm "highest/lowest" theo thời gian → SUM + GROUP BY + ORDER BY + LIMIT
+   - Tìm MAX/MIN value → Dùng MAX/MIN function
+   - Tính "average per period" → AVG hoặc SUM / count periods
+   
+4. **JOIN relationships** - Chỉ JOIN khi thực sự cần, tránh JOIN thừa
+
+5. **WHERE conditions** - Xác định chính xác filters và date ranges
+
+6. **Date handling**:
+   - Nếu date format là YYYYMM: dùng SUBSTR(date, 1, 4) = 'YYYY'
+   - Nếu date là YYYY-MM-DD: dùng date >= '...' AND date <= '...'
+   - BETWEEN chỉ dùng cho numeric/date types, không dùng cho string
+
+Format trả về (JSON format):
+```json
+{{
+  "tables": ["table1", "table2"],
+  "primary_columns": {{"table1": ["id", "name"], "table2": ["id"]}},
+  "foreign_keys": [{{"from": "table1.fk_id", "to": "table2.id", "relationship": "many-to-one"}}],
+  "join_paths": ["table1 JOIN table2 ON table1.fk_id = table2.id"],
+  "where_conditions": ["column1 IS NOT NULL", "column2 = value"],
+  "order_by": ["created_at DESC"],
+  "date_format": "YYYYMM string hoặc YYYY-MM-DD date hoặc timestamp",
+  "aggregation_logic": "MAX/MIN/SUM+GROUP BY/AVG - giải thích logic",
+  "summary": "các bảng và cột cần dùng",
+  "notes": "LƯU Ý về date format, aggregation logic, và edge cases"
+}}
+```
+

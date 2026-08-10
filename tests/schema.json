@@ -1,0 +1,1929 @@
+[
+    {
+        "name": "public.knex_migrations",
+        "description": null,
+        "properties": {
+            "schema": "public",
+            "catalog": "chatbot_db",
+            "table": "knex_migrations"
+        },
+        "columns": [
+            {
+                "name": "name",
+                "ordinal_position": 2,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": null
+            },
+            {
+                "name": "batch",
+                "ordinal_position": 3,
+                "type": "integer",
+                "is_nullable": true,
+                "description": null
+            },
+            {
+                "name": "migration_time",
+                "ordinal_position": 4,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": null
+            },
+            {
+                "name": "id",
+                "ordinal_position": 1,
+                "type": "integer",
+                "is_nullable": false,
+                "description": null
+            }
+        ],
+        "constraint": [
+            {
+                "constrainName": "knex_migrations_id_knex_migrations_id",
+                "constraintTable": "public.knex_migrations",
+                "constraintColumn": "id",
+                "constraintedTable": "public.knex_migrations",
+                "constraintedColumn": "id",
+                "constraintType": "PRIMARY KEY"
+            }
+        ]
+    },
+    {
+        "name": "public.knex_migrations_lock",
+        "description": null,
+        "properties": {
+            "schema": "public",
+            "catalog": "chatbot_db",
+            "table": "knex_migrations_lock"
+        },
+        "columns": [
+            {
+                "name": "is_locked",
+                "ordinal_position": 2,
+                "type": "integer",
+                "is_nullable": true,
+                "description": null
+            },
+            {
+                "name": "index",
+                "ordinal_position": 1,
+                "type": "integer",
+                "is_nullable": false,
+                "description": null
+            }
+        ],
+        "constraint": [
+            {
+                "constrainName": "knex_migrations_lock_index_knex_migrations_lock_index",
+                "constraintTable": "public.knex_migrations_lock",
+                "constraintColumn": "index",
+                "constraintedTable": "public.knex_migrations_lock",
+                "constraintedColumn": "index",
+                "constraintType": "PRIMARY KEY"
+            }
+        ]
+    },
+    {
+        "name": "public.project",
+        "description": null,
+        "properties": {
+            "schema": "public",
+            "catalog": "chatbot_db",
+            "table": "project"
+        },
+        "columns": [
+            {
+                "name": "type",
+                "ordinal_position": 2,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "project datasource type. ex: bigquery, mysql, postgresql, mongodb, etc"
+            },
+            {
+                "name": "display_name",
+                "ordinal_position": 3,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "project display name"
+            },
+            {
+                "name": "catalog",
+                "ordinal_position": 10,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "catalog name"
+            },
+            {
+                "name": "schema",
+                "ordinal_position": 11,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": null
+            },
+            {
+                "name": "sample_dataset",
+                "ordinal_position": 12,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "sample dataset name"
+            },
+            {
+                "name": "id",
+                "ordinal_position": 1,
+                "type": "integer",
+                "is_nullable": false,
+                "description": "ID"
+            },
+            {
+                "name": "created_at",
+                "ordinal_position": 13,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "updated_at",
+                "ordinal_position": 14,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "connection_info",
+                "ordinal_position": 19,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "Connection information for the project"
+            },
+            {
+                "name": "language",
+                "ordinal_position": 20,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "The project language applied to AI"
+            },
+            {
+                "name": "questions",
+                "ordinal_position": 21,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "The recommended questions generated by AI"
+            },
+            {
+                "name": "query_id",
+                "ordinal_position": 22,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "The query id of the recommended question pipeline"
+            },
+            {
+                "name": "questions_status",
+                "ordinal_position": 23,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "The status of the recommended question pipeline"
+            },
+            {
+                "name": "questions_error",
+                "ordinal_position": 24,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "The error of the recommended question pipeline"
+            },
+            {
+                "name": "version",
+                "ordinal_position": 25,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "data source version information"
+            }
+        ],
+        "constraint": [
+            {
+                "constrainName": "project_id_project_id",
+                "constraintTable": "public.project",
+                "constraintColumn": "id",
+                "constraintedTable": "public.project",
+                "constraintedColumn": "id",
+                "constraintType": "PRIMARY KEY"
+            }
+        ]
+    },
+    {
+        "name": "public.model",
+        "description": null,
+        "properties": {
+            "schema": "public",
+            "catalog": "chatbot_db",
+            "table": "model"
+        },
+        "columns": [
+            {
+                "name": "project_id",
+                "ordinal_position": 2,
+                "type": "integer",
+                "is_nullable": true,
+                "description": "Reference to project.id"
+            },
+            {
+                "name": "display_name",
+                "ordinal_position": 3,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "the model display name"
+            },
+            {
+                "name": "source_table_name",
+                "ordinal_position": 4,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "referenced table name in the datasource, can not be duplicated in the same project"
+            },
+            {
+                "name": "reference_name",
+                "ordinal_position": 5,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "the name used in MDL structure, should be unique between models in the same project"
+            },
+            {
+                "name": "ref_sql",
+                "ordinal_position": 6,
+                "type": "text",
+                "is_nullable": true,
+                "description": "Reference SQL"
+            },
+            {
+                "name": "cached",
+                "ordinal_position": 7,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "model is cached or not"
+            },
+            {
+                "name": "refresh_time",
+                "ordinal_position": 8,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "contain a number followed by a time unit (ns, us, ms, s, m, h, d). For example, \"2h\""
+            },
+            {
+                "name": "properties",
+                "ordinal_position": 9,
+                "type": "text",
+                "is_nullable": true,
+                "description": "model properties, a json string, the description and displayName should be stored here"
+            },
+            {
+                "name": "id",
+                "ordinal_position": 1,
+                "type": "integer",
+                "is_nullable": false,
+                "description": "ID"
+            },
+            {
+                "name": "created_at",
+                "ordinal_position": 10,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "updated_at",
+                "ordinal_position": 11,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            }
+        ],
+        "constraint": [
+            {
+                "constrainName": "model_id_model_id",
+                "constraintTable": "public.model",
+                "constraintColumn": "id",
+                "constraintedTable": "public.model",
+                "constraintedColumn": "id",
+                "constraintType": "PRIMARY KEY"
+            }
+        ]
+    },
+    {
+        "name": "public.model_column",
+        "description": null,
+        "properties": {
+            "schema": "public",
+            "catalog": "chatbot_db",
+            "table": "model_column"
+        },
+        "columns": [
+            {
+                "name": "model_id",
+                "ordinal_position": 2,
+                "type": "integer",
+                "is_nullable": true,
+                "description": "Reference to model ID"
+            },
+            {
+                "name": "is_calculated",
+                "ordinal_position": 3,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "Is calculated field"
+            },
+            {
+                "name": "display_name",
+                "ordinal_position": 4,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "Display name of the column"
+            },
+            {
+                "name": "source_column_name",
+                "ordinal_position": 5,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "the column name in the datasource"
+            },
+            {
+                "name": "reference_name",
+                "ordinal_position": 6,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "The name used in the MDL structure and query"
+            },
+            {
+                "name": "aggregation",
+                "ordinal_position": 7,
+                "type": "text",
+                "is_nullable": true,
+                "description": "Expression for the column, could be custom field or calculated field expression, eg: sum, aggregate"
+            },
+            {
+                "name": "lineage",
+                "ordinal_position": 8,
+                "type": "text",
+                "is_nullable": true,
+                "description": "the selected field in calculated field, array of ids, [relationId 1, relationId 2, columnId], last one should be columnId, while others are relationId"
+            },
+            {
+                "name": "type",
+                "ordinal_position": 10,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "Data type, refer to the column type in the datasource"
+            },
+            {
+                "name": "not_null",
+                "ordinal_position": 11,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "Is not null"
+            },
+            {
+                "name": "is_pk",
+                "ordinal_position": 12,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "Is primary key of the table"
+            },
+            {
+                "name": "properties",
+                "ordinal_position": 13,
+                "type": "text",
+                "is_nullable": true,
+                "description": "column properties, a json string, the description and displayName should be stored here"
+            },
+            {
+                "name": "id",
+                "ordinal_position": 1,
+                "type": "integer",
+                "is_nullable": false,
+                "description": "ID"
+            },
+            {
+                "name": "created_at",
+                "ordinal_position": 14,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "updated_at",
+                "ordinal_position": 15,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            }
+        ],
+        "constraint": [
+            {
+                "constrainName": "model_column_model_id_model_id",
+                "constraintTable": "public.model_column",
+                "constraintColumn": "model_id",
+                "constraintedTable": "public.model",
+                "constraintedColumn": "id",
+                "constraintType": "FOREIGN KEY"
+            },
+            {
+                "constrainName": "model_column_id_model_column_id",
+                "constraintTable": "public.model_column",
+                "constraintColumn": "id",
+                "constraintedTable": "public.model_column",
+                "constraintedColumn": "id",
+                "constraintType": "PRIMARY KEY"
+            }
+        ]
+    },
+    {
+        "name": "public.relation",
+        "description": null,
+        "properties": {
+            "schema": "public",
+            "catalog": "chatbot_db",
+            "table": "relation"
+        },
+        "columns": [
+            {
+                "name": "project_id",
+                "ordinal_position": 2,
+                "type": "integer",
+                "is_nullable": true,
+                "description": "Reference to project.id"
+            },
+            {
+                "name": "name",
+                "ordinal_position": 3,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "relation name"
+            },
+            {
+                "name": "join_type",
+                "ordinal_position": 4,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "join type, eg:\"ONE_TO_ONE\", \"ONE_TO_MANY\", \"MANY_TO_ONE\""
+            },
+            {
+                "name": "from_column_id",
+                "ordinal_position": 5,
+                "type": "integer",
+                "is_nullable": true,
+                "description": "from column id, \"{fromColumn} {joinType} {toSideColumn}\""
+            },
+            {
+                "name": "to_column_id",
+                "ordinal_position": 6,
+                "type": "integer",
+                "is_nullable": true,
+                "description": "to column id, \"{fromColumn} {joinType} {toSideColumn}\""
+            },
+            {
+                "name": "id",
+                "ordinal_position": 1,
+                "type": "integer",
+                "is_nullable": false,
+                "description": "ID"
+            },
+            {
+                "name": "created_at",
+                "ordinal_position": 7,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "updated_at",
+                "ordinal_position": 8,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "properties",
+                "ordinal_position": 9,
+                "type": "text",
+                "is_nullable": true,
+                "description": "column properties, a json string, the description of relationships should be stored here"
+            }
+        ],
+        "constraint": [
+            {
+                "constrainName": "relation_from_column_id_model_column_id",
+                "constraintTable": "public.relation",
+                "constraintColumn": "from_column_id",
+                "constraintedTable": "public.model_column",
+                "constraintedColumn": "id",
+                "constraintType": "FOREIGN KEY"
+            },
+            {
+                "constrainName": "relation_to_column_id_model_column_id",
+                "constraintTable": "public.relation",
+                "constraintColumn": "to_column_id",
+                "constraintedTable": "public.model_column",
+                "constraintedColumn": "id",
+                "constraintType": "FOREIGN KEY"
+            },
+            {
+                "constrainName": "relation_id_relation_id",
+                "constraintTable": "public.relation",
+                "constraintColumn": "id",
+                "constraintedTable": "public.relation",
+                "constraintedColumn": "id",
+                "constraintType": "PRIMARY KEY"
+            }
+        ]
+    },
+    {
+        "name": "public.metric",
+        "description": null,
+        "properties": {
+            "schema": "public",
+            "catalog": "chatbot_db",
+            "table": "metric"
+        },
+        "columns": [
+            {
+                "name": "project_id",
+                "ordinal_position": 2,
+                "type": "integer",
+                "is_nullable": true,
+                "description": "Reference to project.id"
+            },
+            {
+                "name": "name",
+                "ordinal_position": 3,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "metric name"
+            },
+            {
+                "name": "type",
+                "ordinal_position": 4,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "metric type, ex: \"simple\" or \"cumulative\""
+            },
+            {
+                "name": "cached",
+                "ordinal_position": 5,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "model is cached or not"
+            },
+            {
+                "name": "refresh_time",
+                "ordinal_position": 6,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "contain a number followed by a time unit (ns, us, ms, s, m, h, d). For example, \"2h\""
+            },
+            {
+                "name": "model_id",
+                "ordinal_position": 7,
+                "type": "integer",
+                "is_nullable": true,
+                "description": "Reference to model.id"
+            },
+            {
+                "name": "metric_id",
+                "ordinal_position": 8,
+                "type": "integer",
+                "is_nullable": true,
+                "description": "Reference to metric.id"
+            },
+            {
+                "name": "properties",
+                "ordinal_position": 9,
+                "type": "text",
+                "is_nullable": true,
+                "description": "metric properties, a json string, the description and displayName should be stored here"
+            },
+            {
+                "name": "id",
+                "ordinal_position": 1,
+                "type": "integer",
+                "is_nullable": false,
+                "description": "ID"
+            },
+            {
+                "name": "created_at",
+                "ordinal_position": 10,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "updated_at",
+                "ordinal_position": 11,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            }
+        ],
+        "constraint": [
+            {
+                "constrainName": "metric_id_metric_id",
+                "constraintTable": "public.metric",
+                "constraintColumn": "id",
+                "constraintedTable": "public.metric",
+                "constraintedColumn": "id",
+                "constraintType": "PRIMARY KEY"
+            }
+        ]
+    },
+    {
+        "name": "public.metric_measure",
+        "description": null,
+        "properties": {
+            "schema": "public",
+            "catalog": "chatbot_db",
+            "table": "metric_measure"
+        },
+        "columns": [
+            {
+                "name": "metric_id",
+                "ordinal_position": 2,
+                "type": "integer",
+                "is_nullable": true,
+                "description": "Reference to metric ID"
+            },
+            {
+                "name": "name",
+                "ordinal_position": 3,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "Measure name"
+            },
+            {
+                "name": "expression",
+                "ordinal_position": 4,
+                "type": "text",
+                "is_nullable": true,
+                "description": "the expression of measure, eg: \"Sum\", \"Everage\", or customize expression"
+            },
+            {
+                "name": "granularity",
+                "ordinal_position": 5,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "Granularity for the measure, eg: \"day\", \"hour\", \"minute\", \"year\""
+            },
+            {
+                "name": "id",
+                "ordinal_position": 1,
+                "type": "integer",
+                "is_nullable": false,
+                "description": "ID"
+            },
+            {
+                "name": "created_at",
+                "ordinal_position": 6,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "updated_at",
+                "ordinal_position": 7,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            }
+        ],
+        "constraint": [
+            {
+                "constrainName": "metric_measure_metric_id_metric_id",
+                "constraintTable": "public.metric_measure",
+                "constraintColumn": "metric_id",
+                "constraintedTable": "public.metric",
+                "constraintedColumn": "id",
+                "constraintType": "FOREIGN KEY"
+            },
+            {
+                "constrainName": "metric_measure_id_metric_measure_id",
+                "constraintTable": "public.metric_measure",
+                "constraintColumn": "id",
+                "constraintedTable": "public.metric_measure",
+                "constraintedColumn": "id",
+                "constraintType": "PRIMARY KEY"
+            }
+        ]
+    },
+    {
+        "name": "public.view",
+        "description": null,
+        "properties": {
+            "schema": "public",
+            "catalog": "chatbot_db",
+            "table": "view"
+        },
+        "columns": [
+            {
+                "name": "project_id",
+                "ordinal_position": 2,
+                "type": "integer",
+                "is_nullable": true,
+                "description": "Reference to project.id"
+            },
+            {
+                "name": "name",
+                "ordinal_position": 3,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "the view name"
+            },
+            {
+                "name": "statement",
+                "ordinal_position": 4,
+                "type": "text",
+                "is_nullable": true,
+                "description": "the sql statement of this view"
+            },
+            {
+                "name": "cached",
+                "ordinal_position": 5,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "view is cached or not"
+            },
+            {
+                "name": "refresh_time",
+                "ordinal_position": 6,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "contain a number followed by a time unit (ns, us, ms, s, m, h, d). For example, \"2h\""
+            },
+            {
+                "name": "properties",
+                "ordinal_position": 7,
+                "type": "text",
+                "is_nullable": true,
+                "description": "view properties, a json string, the description and displayName should be stored here"
+            },
+            {
+                "name": "id",
+                "ordinal_position": 1,
+                "type": "integer",
+                "is_nullable": false,
+                "description": "ID"
+            },
+            {
+                "name": "created_at",
+                "ordinal_position": 8,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "updated_at",
+                "ordinal_position": 9,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            }
+        ],
+        "constraint": [
+            {
+                "constrainName": "view_id_view_id",
+                "constraintTable": "public.view",
+                "constraintColumn": "id",
+                "constraintedTable": "public.view",
+                "constraintedColumn": "id",
+                "constraintType": "PRIMARY KEY"
+            }
+        ]
+    },
+    {
+        "name": "public.deploy_log",
+        "description": null,
+        "properties": {
+            "schema": "public",
+            "catalog": "chatbot_db",
+            "table": "deploy_log"
+        },
+        "columns": [
+            {
+                "name": "project_id",
+                "ordinal_position": 2,
+                "type": "integer",
+                "is_nullable": true,
+                "description": "Reference to project.id"
+            },
+            {
+                "name": "manifest",
+                "ordinal_position": 3,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "the deployed manifest"
+            },
+            {
+                "name": "hash",
+                "ordinal_position": 4,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "the hash of the manifest"
+            },
+            {
+                "name": "status",
+                "ordinal_position": 5,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "deploy status"
+            },
+            {
+                "name": "error",
+                "ordinal_position": 6,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "deploy error message"
+            },
+            {
+                "name": "id",
+                "ordinal_position": 1,
+                "type": "integer",
+                "is_nullable": false,
+                "description": "ID"
+            },
+            {
+                "name": "created_at",
+                "ordinal_position": 7,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "updated_at",
+                "ordinal_position": 8,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            }
+        ],
+        "constraint": [
+            {
+                "constrainName": "deploy_log_id_deploy_log_id",
+                "constraintTable": "public.deploy_log",
+                "constraintColumn": "id",
+                "constraintedTable": "public.deploy_log",
+                "constraintedColumn": "id",
+                "constraintType": "PRIMARY KEY"
+            }
+        ]
+    },
+    {
+        "name": "public.thread",
+        "description": null,
+        "properties": {
+            "schema": "public",
+            "catalog": "chatbot_db",
+            "table": "thread"
+        },
+        "columns": [
+            {
+                "name": "project_id",
+                "ordinal_position": 2,
+                "type": "integer",
+                "is_nullable": true,
+                "description": "Reference to project.id"
+            },
+            {
+                "name": "summary",
+                "ordinal_position": 4,
+                "type": "text",
+                "is_nullable": true,
+                "description": "the summary of the thread"
+            },
+            {
+                "name": "id",
+                "ordinal_position": 1,
+                "type": "integer",
+                "is_nullable": false,
+                "description": "ID"
+            },
+            {
+                "name": "created_at",
+                "ordinal_position": 5,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "updated_at",
+                "ordinal_position": 6,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "questions",
+                "ordinal_position": 7,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "The recommended questions generated by AI"
+            },
+            {
+                "name": "query_id",
+                "ordinal_position": 8,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "The query id of the recommended question pipeline"
+            },
+            {
+                "name": "questions_status",
+                "ordinal_position": 9,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "The status of the recommended question pipeline"
+            },
+            {
+                "name": "questions_error",
+                "ordinal_position": 10,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "The error of the recommended question pipeline"
+            }
+        ],
+        "constraint": [
+            {
+                "constrainName": "thread_id_thread_id",
+                "constraintTable": "public.thread",
+                "constraintColumn": "id",
+                "constraintedTable": "public.thread",
+                "constraintedColumn": "id",
+                "constraintType": "PRIMARY KEY"
+            }
+        ]
+    },
+    {
+        "name": "public.thread_response",
+        "description": null,
+        "properties": {
+            "schema": "public",
+            "catalog": "chatbot_db",
+            "table": "thread_response"
+        },
+        "columns": [
+            {
+                "name": "thread_id",
+                "ordinal_position": 2,
+                "type": "integer",
+                "is_nullable": true,
+                "description": "Reference to thread.id"
+            },
+            {
+                "name": "question",
+                "ordinal_position": 4,
+                "type": "text",
+                "is_nullable": true,
+                "description": "the question of the response"
+            },
+            {
+                "name": "id",
+                "ordinal_position": 1,
+                "type": "integer",
+                "is_nullable": false,
+                "description": "ID"
+            },
+            {
+                "name": "created_at",
+                "ordinal_position": 8,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "updated_at",
+                "ordinal_position": 9,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "sql",
+                "ordinal_position": 11,
+                "type": "text",
+                "is_nullable": true,
+                "description": "the SQL query generated by AI service"
+            },
+            {
+                "name": "answer_detail",
+                "ordinal_position": 12,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "AI generated text-based answer detail"
+            },
+            {
+                "name": "view_id",
+                "ordinal_position": 13,
+                "type": "integer",
+                "is_nullable": true,
+                "description": "the view ID associated with the response"
+            },
+            {
+                "name": "breakdown_detail",
+                "ordinal_position": 6,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "the detail of the response"
+            },
+            {
+                "name": "chart_detail",
+                "ordinal_position": 14,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": null
+            },
+            {
+                "name": "asking_task_id",
+                "ordinal_position": 15,
+                "type": "integer",
+                "is_nullable": true,
+                "description": null
+            },
+            {
+                "name": "adjustment",
+                "ordinal_position": 16,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "Adjustment data for thread response, including type and payload"
+            }
+        ],
+        "constraint": [
+            {
+                "constrainName": "thread_response_thread_id_thread_id",
+                "constraintTable": "public.thread_response",
+                "constraintColumn": "thread_id",
+                "constraintedTable": "public.thread",
+                "constraintedColumn": "id",
+                "constraintType": "FOREIGN KEY"
+            },
+            {
+                "constrainName": "thread_response_asking_task_id_asking_task_id",
+                "constraintTable": "public.thread_response",
+                "constraintColumn": "asking_task_id",
+                "constraintedTable": "public.asking_task",
+                "constraintedColumn": "id",
+                "constraintType": "FOREIGN KEY"
+            },
+            {
+                "constrainName": "thread_response_id_thread_response_id",
+                "constraintTable": "public.thread_response",
+                "constraintColumn": "id",
+                "constraintedTable": "public.thread_response",
+                "constraintedColumn": "id",
+                "constraintType": "PRIMARY KEY"
+            }
+        ]
+    },
+    {
+        "name": "public.schema_change",
+        "description": null,
+        "properties": {
+            "schema": "public",
+            "catalog": "chatbot_db",
+            "table": "schema_change"
+        },
+        "columns": [
+            {
+                "name": "project_id",
+                "ordinal_position": 2,
+                "type": "integer",
+                "is_nullable": true,
+                "description": "Reference to project.id"
+            },
+            {
+                "name": "change",
+                "ordinal_position": 3,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": null
+            },
+            {
+                "name": "resolve",
+                "ordinal_position": 4,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": null
+            },
+            {
+                "name": "id",
+                "ordinal_position": 1,
+                "type": "integer",
+                "is_nullable": false,
+                "description": "ID"
+            },
+            {
+                "name": "created_at",
+                "ordinal_position": 5,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "updated_at",
+                "ordinal_position": 6,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            }
+        ],
+        "constraint": [
+            {
+                "constrainName": "schema_change_id_schema_change_id",
+                "constraintTable": "public.schema_change",
+                "constraintColumn": "id",
+                "constraintedTable": "public.schema_change",
+                "constraintedColumn": "id",
+                "constraintType": "PRIMARY KEY"
+            }
+        ]
+    },
+    {
+        "name": "public.model_nested_column",
+        "description": null,
+        "properties": {
+            "schema": "public",
+            "catalog": "chatbot_db",
+            "table": "model_nested_column"
+        },
+        "columns": [
+            {
+                "name": "model_id",
+                "ordinal_position": 2,
+                "type": "integer",
+                "is_nullable": true,
+                "description": "Reference to model ID"
+            },
+            {
+                "name": "column_id",
+                "ordinal_position": 3,
+                "type": "integer",
+                "is_nullable": true,
+                "description": "Reference to column ID"
+            },
+            {
+                "name": "column_path",
+                "ordinal_position": 4,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "The path of the nested column, array of strings, [sourceColumnName..sourceColumnName(n)]"
+            },
+            {
+                "name": "display_name",
+                "ordinal_position": 5,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "Display name of the nested column"
+            },
+            {
+                "name": "source_column_name",
+                "ordinal_position": 6,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "the nested column name in the datasource"
+            },
+            {
+                "name": "reference_name",
+                "ordinal_position": 7,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "The name used in the MDL structure and query"
+            },
+            {
+                "name": "type",
+                "ordinal_position": 8,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "Data type, refer to the nested column type in the datasource"
+            },
+            {
+                "name": "properties",
+                "ordinal_position": 9,
+                "type": "text",
+                "is_nullable": true,
+                "description": "nested column properties, a json string, the description should be stored here"
+            },
+            {
+                "name": "id",
+                "ordinal_position": 1,
+                "type": "integer",
+                "is_nullable": false,
+                "description": "ID"
+            },
+            {
+                "name": "created_at",
+                "ordinal_position": 10,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "updated_at",
+                "ordinal_position": 11,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            }
+        ],
+        "constraint": [
+            {
+                "constrainName": "model_nested_column_column_id_model_column_id",
+                "constraintTable": "public.model_nested_column",
+                "constraintColumn": "column_id",
+                "constraintedTable": "public.model_column",
+                "constraintedColumn": "id",
+                "constraintType": "FOREIGN KEY"
+            },
+            {
+                "constrainName": "model_nested_column_id_model_nested_column_id",
+                "constraintTable": "public.model_nested_column",
+                "constraintColumn": "id",
+                "constraintedTable": "public.model_nested_column",
+                "constraintedColumn": "id",
+                "constraintType": "PRIMARY KEY"
+            }
+        ]
+    },
+    {
+        "name": "public.learning",
+        "description": null,
+        "properties": {
+            "schema": "public",
+            "catalog": "chatbot_db",
+            "table": "learning"
+        },
+        "columns": [
+            {
+                "name": "user_id",
+                "ordinal_position": 2,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "The user uuid."
+            },
+            {
+                "name": "paths",
+                "ordinal_position": 3,
+                "type": "text",
+                "is_nullable": true,
+                "description": "The learning paths of user, array of learning stories, [enum1, enum2, ..enum(n)]."
+            },
+            {
+                "name": "id",
+                "ordinal_position": 1,
+                "type": "integer",
+                "is_nullable": false,
+                "description": "ID"
+            }
+        ],
+        "constraint": [
+            {
+                "constrainName": "learning_id_learning_id",
+                "constraintTable": "public.learning",
+                "constraintColumn": "id",
+                "constraintedTable": "public.learning",
+                "constraintedColumn": "id",
+                "constraintType": "PRIMARY KEY"
+            }
+        ]
+    },
+    {
+        "name": "public.dashboard",
+        "description": null,
+        "properties": {
+            "schema": "public",
+            "catalog": "chatbot_db",
+            "table": "dashboard"
+        },
+        "columns": [
+            {
+                "name": "project_id",
+                "ordinal_position": 2,
+                "type": "integer",
+                "is_nullable": false,
+                "description": "Reference to project.id"
+            },
+            {
+                "name": "name",
+                "ordinal_position": 3,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": "The dashboard name"
+            },
+            {
+                "name": "id",
+                "ordinal_position": 1,
+                "type": "integer",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "created_at",
+                "ordinal_position": 4,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "updated_at",
+                "ordinal_position": 5,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "cache_enabled",
+                "ordinal_position": 6,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": null
+            },
+            {
+                "name": "schedule_frequency",
+                "ordinal_position": 7,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": null
+            },
+            {
+                "name": "schedule_cron",
+                "ordinal_position": 8,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": null
+            },
+            {
+                "name": "schedule_timezone",
+                "ordinal_position": 9,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": null
+            },
+            {
+                "name": "next_scheduled_at",
+                "ordinal_position": 10,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": null
+            }
+        ],
+        "constraint": [
+            {
+                "constrainName": "dashboard_project_id_project_id",
+                "constraintTable": "public.dashboard",
+                "constraintColumn": "project_id",
+                "constraintedTable": "public.project",
+                "constraintedColumn": "id",
+                "constraintType": "FOREIGN KEY"
+            },
+            {
+                "constrainName": "dashboard_id_dashboard_id",
+                "constraintTable": "public.dashboard",
+                "constraintColumn": "id",
+                "constraintedTable": "public.dashboard",
+                "constraintedColumn": "id",
+                "constraintType": "PRIMARY KEY"
+            }
+        ]
+    },
+    {
+        "name": "public.dashboard_item",
+        "description": null,
+        "properties": {
+            "schema": "public",
+            "catalog": "chatbot_db",
+            "table": "dashboard_item"
+        },
+        "columns": [
+            {
+                "name": "dashboard_id",
+                "ordinal_position": 2,
+                "type": "integer",
+                "is_nullable": false,
+                "description": "Reference to dashboard.id"
+            },
+            {
+                "name": "type",
+                "ordinal_position": 3,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": "The chart type of the dashboard item, such as: bar, table, number, etc"
+            },
+            {
+                "name": "layout",
+                "ordinal_position": 4,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": "The layout of the dashboard item, according to which library it is, such as: { x: 0, y: 0, w: 6, h: 6 }"
+            },
+            {
+                "name": "detail",
+                "ordinal_position": 5,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": "The detail of the dashboard item, such as: { chartSchema: {...}, sql: \"...\" } "
+            },
+            {
+                "name": "id",
+                "ordinal_position": 1,
+                "type": "integer",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "created_at",
+                "ordinal_position": 6,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "updated_at",
+                "ordinal_position": 7,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "display_name",
+                "ordinal_position": 8,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": "Display name of the dashboard item"
+            }
+        ],
+        "constraint": [
+            {
+                "constrainName": "dashboard_item_dashboard_id_dashboard_id",
+                "constraintTable": "public.dashboard_item",
+                "constraintColumn": "dashboard_id",
+                "constraintedTable": "public.dashboard",
+                "constraintedColumn": "id",
+                "constraintType": "FOREIGN KEY"
+            },
+            {
+                "constrainName": "dashboard_item_id_dashboard_item_id",
+                "constraintTable": "public.dashboard_item",
+                "constraintColumn": "id",
+                "constraintedTable": "public.dashboard_item",
+                "constraintedColumn": "id",
+                "constraintType": "PRIMARY KEY"
+            }
+        ]
+    },
+    {
+        "name": "public.sql_pair",
+        "description": null,
+        "properties": {
+            "schema": "public",
+            "catalog": "chatbot_db",
+            "table": "sql_pair"
+        },
+        "columns": [
+            {
+                "name": "project_id",
+                "ordinal_position": 2,
+                "type": "integer",
+                "is_nullable": false,
+                "description": "Reference to project.id"
+            },
+            {
+                "name": "sql",
+                "ordinal_position": 3,
+                "type": "text",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "question",
+                "ordinal_position": 4,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "id",
+                "ordinal_position": 1,
+                "type": "integer",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "created_at",
+                "ordinal_position": 5,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "updated_at",
+                "ordinal_position": 6,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            }
+        ],
+        "constraint": [
+            {
+                "constrainName": "sql_pair_project_id_project_id",
+                "constraintTable": "public.sql_pair",
+                "constraintColumn": "project_id",
+                "constraintedTable": "public.project",
+                "constraintedColumn": "id",
+                "constraintType": "FOREIGN KEY"
+            },
+            {
+                "constrainName": "sql_pair_id_sql_pair_id",
+                "constraintTable": "public.sql_pair",
+                "constraintColumn": "id",
+                "constraintedTable": "public.sql_pair",
+                "constraintedColumn": "id",
+                "constraintType": "PRIMARY KEY"
+            }
+        ]
+    },
+    {
+        "name": "public.instruction",
+        "description": null,
+        "properties": {
+            "schema": "public",
+            "catalog": "chatbot_db",
+            "table": "instruction"
+        },
+        "columns": [
+            {
+                "name": "project_id",
+                "ordinal_position": 2,
+                "type": "integer",
+                "is_nullable": false,
+                "description": "Reference to project.id"
+            },
+            {
+                "name": "instruction",
+                "ordinal_position": 3,
+                "type": "text",
+                "is_nullable": false,
+                "description": "The instruction text"
+            },
+            {
+                "name": "questions",
+                "ordinal_position": 4,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": "The questions array"
+            },
+            {
+                "name": "is_default",
+                "ordinal_position": 5,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": "Whether this instruction should be used in each asking"
+            },
+            {
+                "name": "id",
+                "ordinal_position": 1,
+                "type": "integer",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "created_at",
+                "ordinal_position": 6,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "updated_at",
+                "ordinal_position": 7,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            }
+        ],
+        "constraint": [
+            {
+                "constrainName": "instruction_project_id_project_id",
+                "constraintTable": "public.instruction",
+                "constraintColumn": "project_id",
+                "constraintedTable": "public.project",
+                "constraintedColumn": "id",
+                "constraintType": "FOREIGN KEY"
+            },
+            {
+                "constrainName": "instruction_id_instruction_id",
+                "constraintTable": "public.instruction",
+                "constraintColumn": "id",
+                "constraintedTable": "public.instruction",
+                "constraintedColumn": "id",
+                "constraintType": "PRIMARY KEY"
+            }
+        ]
+    },
+    {
+        "name": "public.dashboard_item_refresh_job",
+        "description": null,
+        "properties": {
+            "schema": "public",
+            "catalog": "chatbot_db",
+            "table": "dashboard_item_refresh_job"
+        },
+        "columns": [
+            {
+                "name": "hash",
+                "ordinal_position": 2,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": "uuid for the refresh job"
+            },
+            {
+                "name": "dashboard_id",
+                "ordinal_position": 3,
+                "type": "integer",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "dashboard_item_id",
+                "ordinal_position": 4,
+                "type": "integer",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "started_at",
+                "ordinal_position": 5,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "finished_at",
+                "ordinal_position": 6,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": null
+            },
+            {
+                "name": "status",
+                "ordinal_position": 7,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "error_message",
+                "ordinal_position": 8,
+                "type": "text",
+                "is_nullable": true,
+                "description": null
+            },
+            {
+                "name": "id",
+                "ordinal_position": 1,
+                "type": "integer",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "created_at",
+                "ordinal_position": 9,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "updated_at",
+                "ordinal_position": 10,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            }
+        ],
+        "constraint": [
+            {
+                "constrainName": "dashboard_item_refresh_job_dashboard_id_dashboard_id",
+                "constraintTable": "public.dashboard_item_refresh_job",
+                "constraintColumn": "dashboard_id",
+                "constraintedTable": "public.dashboard",
+                "constraintedColumn": "id",
+                "constraintType": "FOREIGN KEY"
+            },
+            {
+                "constrainName": "dashboard_item_refresh_job_dashboard_item_id_dashboard_item_id",
+                "constraintTable": "public.dashboard_item_refresh_job",
+                "constraintColumn": "dashboard_item_id",
+                "constraintedTable": "public.dashboard_item",
+                "constraintedColumn": "id",
+                "constraintType": "FOREIGN KEY"
+            },
+            {
+                "constrainName": "dashboard_item_refresh_job_id_dashboard_item_refresh_job_id",
+                "constraintTable": "public.dashboard_item_refresh_job",
+                "constraintColumn": "id",
+                "constraintedTable": "public.dashboard_item_refresh_job",
+                "constraintedColumn": "id",
+                "constraintType": "PRIMARY KEY"
+            }
+        ]
+    },
+    {
+        "name": "public.asking_task",
+        "description": null,
+        "properties": {
+            "schema": "public",
+            "catalog": "chatbot_db",
+            "table": "asking_task"
+        },
+        "columns": [
+            {
+                "name": "query_id",
+                "ordinal_position": 2,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "question",
+                "ordinal_position": 3,
+                "type": "text",
+                "is_nullable": true,
+                "description": null
+            },
+            {
+                "name": "thread_id",
+                "ordinal_position": 5,
+                "type": "integer",
+                "is_nullable": true,
+                "description": null
+            },
+            {
+                "name": "thread_response_id",
+                "ordinal_position": 6,
+                "type": "integer",
+                "is_nullable": true,
+                "description": null
+            },
+            {
+                "name": "id",
+                "ordinal_position": 1,
+                "type": "integer",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "detail",
+                "ordinal_position": 4,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": null
+            },
+            {
+                "name": "created_at",
+                "ordinal_position": 7,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "updated_at",
+                "ordinal_position": 8,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            }
+        ],
+        "constraint": [
+            {
+                "constrainName": "asking_task_thread_id_thread_id",
+                "constraintTable": "public.asking_task",
+                "constraintColumn": "thread_id",
+                "constraintedTable": "public.thread",
+                "constraintedColumn": "id",
+                "constraintType": "FOREIGN KEY"
+            },
+            {
+                "constrainName": "asking_task_thread_response_id_thread_response_id",
+                "constraintTable": "public.asking_task",
+                "constraintColumn": "thread_response_id",
+                "constraintedTable": "public.thread_response",
+                "constraintedColumn": "id",
+                "constraintType": "FOREIGN KEY"
+            },
+            {
+                "constrainName": "asking_task_id_asking_task_id",
+                "constraintTable": "public.asking_task",
+                "constraintColumn": "id",
+                "constraintedTable": "public.asking_task",
+                "constraintedColumn": "id",
+                "constraintType": "PRIMARY KEY"
+            }
+        ]
+    },
+    {
+        "name": "public.api_history",
+        "description": null,
+        "properties": {
+            "schema": "public",
+            "catalog": "chatbot_db",
+            "table": "api_history"
+        },
+        "columns": [
+            {
+                "name": "id",
+                "ordinal_position": 1,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "project_id",
+                "ordinal_position": 2,
+                "type": "integer",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "thread_id",
+                "ordinal_position": 3,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": null
+            },
+            {
+                "name": "api_type",
+                "ordinal_position": 4,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "headers",
+                "ordinal_position": 5,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": null
+            },
+            {
+                "name": "request_payload",
+                "ordinal_position": 6,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": null
+            },
+            {
+                "name": "response_payload",
+                "ordinal_position": 7,
+                "type": "unknown",
+                "is_nullable": true,
+                "description": null
+            },
+            {
+                "name": "status_code",
+                "ordinal_position": 8,
+                "type": "integer",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "duration_ms",
+                "ordinal_position": 9,
+                "type": "integer",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "created_at",
+                "ordinal_position": 10,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            },
+            {
+                "name": "updated_at",
+                "ordinal_position": 11,
+                "type": "unknown",
+                "is_nullable": false,
+                "description": null
+            }
+        ],
+        "constraint": [
+            {
+                "constrainName": "api_history_project_id_project_id",
+                "constraintTable": "public.api_history",
+                "constraintColumn": "project_id",
+                "constraintedTable": "public.project",
+                "constraintedColumn": "id",
+                "constraintType": "FOREIGN KEY"
+            },
+            {
+                "constrainName": "api_history_id_api_history_id",
+                "constraintTable": "public.api_history",
+                "constraintColumn": "id",
+                "constraintedTable": "public.api_history",
+                "constraintedColumn": "id",
+                "constraintType": "PRIMARY KEY"
+            }
+        ]
+    }
+]

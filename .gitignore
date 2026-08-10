@@ -1,0 +1,29 @@
+# Python virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables (Bảo mật thông tin API keys)
+.env
+.env.*
+!.env.example
+
+# IDE & Code Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker / Build artifacts
+*.bak
+*.log
+
+# Vector DB & Local Models (nếu có sinh ra local)
+qdrant/
+models/

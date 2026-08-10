@@ -1,0 +1,196 @@
+-- ===== 1) CREATE DATABASE (run once as superuser, or skip if you already have one)
+-- CREATE DATABASE app_db WITH TEMPLATE=template0 ENCODING 'UTF8';
+
+-- Connect to your DB
+-- \c app_db;
+
+-- ===== 2) CORE SCHEMA
+CREATE SCHEMA IF NOT EXISTS core AUTHORIZATION CURRENT_USER;
+
+-- ===== 3) EXTENSIONS (optional but useful)
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS citext;        -- case-insensitive text for emails/usernames
+
+-- ===== 4) TYPES
+CREATE TYPE core.payment_status AS ENUM ('pending','authorized','captured','refunded','failed','canceled');
+CREATE TYPE core.order_status   AS ENUM ('draft','placed','paid','fulfilled','canceled');
+
+-- ===== 5) AUTH & ORGS
+CREATE TABLE core.users (
+  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  email           CITEXT UNIQUE NOT NULL,
+  password_hash   TEXT NOT NULL,
+  display_name    TEXT NOT NULL,
+  is_active       BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE core.organizations (
+  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name            TEXT NOT NULL UNIQUE,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE core.memberships (
+  org_id          UUID NOT NULL REFERENCES core.organizations(id) ON DELETE CASCADE,
+  user_id         UUID NOT NULL REFERENCES core.users(id) ON DELETE CASCADE,
+  role            TEXT NOT NULL DEFAULT 'member',          -- simple org-level role
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (org_id, user_id)
+);
+
+-- RBAC (global or per-org via org_id NULLable)
+CREATE TABLE core.roles (
+  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  org_id          UUID REFERENCES core.organizations(id) ON DELETE CASCADE,
+  code            TEXT NOT NULL,                           -- e.g. 'admin', 'editor'
+  label           TEXT NOT NULL,
+  UNIQUE (org_id, code)
+);
+
+CREATE TABLE core.permissions (
+  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  code            TEXT NOT NULL UNIQUE,                    -- e.g. 'orders.read'
+  label           TEXT NOT NULL
+);
+
+CREATE TABLE core.role_permissions (
+  role_id         UUID NOT NULL REFERENCES core.roles(id) ON DELETE CASCADE,
+  permission_id   UUID NOT NULL REFERENCES core.permissions(id) ON DELETE CASCADE,
+  PRIMARY KEY (role_id, permission_id)
+);
+
+CREATE TABLE core.user_roles (
+  user_id         UUID NOT NULL REFERENCES core.users(id) ON DELETE CASCADE,
+  role_id         UUID NOT NULL REFERENCES core.roles(id) ON DELETE CASCADE,
+  org_id          UUID REFERENCES core.organizations(id) ON DELETE CASCADE,
+  PRIMARY KEY (user_id, role_id, org_id)
+);
+
+-- ===== 6) CATALOGS / SIMPLE COMMERCE
+CREATE TABLE core.customers (
+  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  org_id          UUID NOT NULL REFERENCES core.organizations(id) ON DELETE CASCADE,
+  email           CITEXT NOT NULL,
+  name            TEXT,
+  phone           TEXT,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (org_id, email)
+);
+
+CREATE TABLE core.products (
+  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  org_id          UUID NOT NULL REFERENCES core.organizations(id) ON DELETE CASCADE,
+  sku             TEXT NOT NULL,
+  name            TEXT NOT NULL,
+  description     TEXT,
+  unit_price_cents INTEGER NOT NULL CHECK (unit_price_cents >= 0),
+  active          BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (org_id, sku)
+);
+
+CREATE TABLE core.orders (
+  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  org_id          UUID NOT NULL REFERENCES core.organizations(id) ON DELETE CASCADE,
+  customer_id     UUID REFERENCES core.customers(id) ON DELETE SET NULL,
+  status          core.order_status NOT NULL DEFAULT 'draft',
+  currency        CHAR(3) NOT NULL DEFAULT 'USD',
+  subtotal_cents  INTEGER NOT NULL DEFAULT 0 CHECK (subtotal_cents >= 0),
+  tax_cents       INTEGER NOT NULL DEFAULT 0 CHECK (tax_cents >= 0),
+  total_cents     INTEGER NOT NULL DEFAULT 0 CHECK (total_cents >= 0),
+  placed_at       TIMESTAMPTZ,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE core.order_items (
+  order_id        UUID NOT NULL REFERENCES core.orders(id) ON DELETE CASCADE,
+  line_no         INTEGER NOT NULL,
+  product_id      UUID NOT NULL REFERENCES core.products(id) ON DELETE RESTRICT,
+  qty             INTEGER NOT NULL CHECK (qty > 0),
+  unit_price_cents INTEGER NOT NULL CHECK (unit_price_cents >= 0),
+  total_cents     INTEGER NOT NULL CHECK (total_cents >= 0),
+  PRIMARY KEY (order_id, line_no)
+);
+
+CREATE TABLE core.payments (
+  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  order_id        UUID NOT NULL REFERENCES core.orders(id) ON DELETE CASCADE,
+  provider        TEXT NOT NULL,                 -- 'stripe','paypal','cod', etc.
+  external_ref    TEXT,
+  amount_cents    INTEGER NOT NULL CHECK (amount_cents >= 0),
+  status          core.payment_status NOT NULL DEFAULT 'pending',
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- ===== 7) FILES / ATTACHMENTS (e.g., receipts, invoices)
+CREATE TABLE core.attachments (
+  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  org_id          UUID NOT NULL REFERENCES core.organizations(id) ON DELETE CASCADE,
+  owner_user_id   UUID REFERENCES core.users(id) ON DELETE SET NULL,
+  bucket          TEXT NOT NULL,
+  object_key      TEXT NOT NULL,
+  mime_type       TEXT,
+  bytes           BIGINT CHECK (bytes >= 0),
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (bucket, object_key)
+);
+
+-- ===== 8) AUDIT LOG
+CREATE TABLE core.audit_log (
+  id              BIGSERIAL PRIMARY KEY,
+  at              TIMESTAMPTZ NOT NULL DEFAULT now(),
+  actor_user_id   UUID REFERENCES core.users(id) ON DELETE SET NULL,
+  org_id          UUID REFERENCES core.organizations(id) ON DELETE SET NULL,
+  action          TEXT NOT NULL,                -- e.g. 'order.create'
+  entity_table    TEXT NOT NULL,
+  entity_id       TEXT NOT NULL,
+  meta            JSONB
+);
+
+-- ===== 9) API KEYS (optional)
+CREATE TABLE core.api_keys (
+  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  org_id          UUID REFERENCES core.organizations(id) ON DELETE CASCADE,
+  label           TEXT NOT NULL,
+  hashed_key      TEXT NOT NULL,
+  created_by      UUID REFERENCES core.users(id) ON DELETE SET NULL,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  revoked_at      TIMESTAMPTZ
+);
+
+-- ===== 10) INDEXES
+CREATE INDEX ON core.users (created_at);
+CREATE INDEX ON core.memberships (user_id);
+CREATE INDEX ON core.roles (org_id);
+CREATE INDEX ON core.user_roles (user_id, org_id);
+CREATE INDEX ON core.products (org_id, active);
+CREATE INDEX ON core.orders (org_id, status, created_at);
+CREATE INDEX ON core.order_items (product_id);
+CREATE INDEX ON core.payments (order_id, status);
+CREATE INDEX ON core.audit_log (org_id, at);
+CREATE INDEX ON core.attachments (org_id, created_at);
+
+-- ===== 11) SIMPLE TRIGGERS (touch updated_at)
+CREATE OR REPLACE FUNCTION core.touch_updated_at()
+RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  NEW.updated_at := now();
+  RETURN NEW;
+END; $$;
+
+CREATE TRIGGER trg_users_touch
+BEFORE UPDATE ON core.users
+FOR EACH ROW EXECUTE PROCEDURE core.touch_updated_at();
+
+CREATE TRIGGER trg_products_touch
+BEFORE UPDATE ON core.products
+FOR EACH ROW EXECUTE PROCEDURE core.touch_updated_at();
+
+CREATE TRIGGER trg_orders_touch
+BEFORE UPDATE ON core.orders
+FOR EACH ROW EXECUTE PROCEDURE core.touch_updated_at();

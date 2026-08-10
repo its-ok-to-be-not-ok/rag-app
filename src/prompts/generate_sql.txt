@@ -1,0 +1,45 @@
+Sinh SQL query chính xác từ câu hỏi tự nhiên và trả về kết quả dưới dạng JSON.
+
+Input:
+- Thời gian hiện tại: {current_time}
+- Câu hỏi: {question}
+- Schema chi tiết: {table_schemas}
+- Phân tích chi tiết (joins, conditions, order):
+{analysis_context}
+- Các query tương tự từ database (RAG): {similar_examples}
+
+QUY TẮC QUAN TRỌNG:
+
+1. **User ID Tagging (SESSION / AUTHENTICATION MATCHING)**:
+   - Backend/Frontend sử dụng tag tĩnh `:user_id` để nhận diện và tự động đè UUID người dùng từ Session/Auth Token.
+   - Khi câu hỏi yêu cầu dữ liệu cá nhân của người dùng hiện tại (ví dụ: "hồ sơ của tôi", "CV của tôi", "job tôi đã ứng tuyển", "tài khoản của tôi"):
+     + BẮT BUỘC DÙNG ĐÚNG CÚ PHÁP: `:user_id`
+     + Ví dụ: `WHERE public.resumes.user_id = :user_id` hoặc `WHERE public.users.id = :user_id`
+     + TUYỆT ĐỐI KHÔNG DÙNG các biến thể khác như: `:current_user_id`, `CURRENT_USER_ID`, `'user_uuid'`, `'your_user_id'`, hay `'user_id_của_bạn'`. Nếu dùng sai, hệ thống Backend sẽ vỡ do không parse được session.
+
+2. **Table Selection**:
+   - Chỉ JOIN khi thực sự cần, tránh JOIN thừa
+
+3. **Column Names**:
+   - Sử dụng chính xác tên cột từ schema (case-sensitive)
+
+4. Skill Matching (CRITICAL — follow exactly):
+   - Column "tags" in table "public.jobs" is JSON/JSONB.
+   - ALWAYS use this format for skill matching:
+       tags ?| ARRAY['Skill1','Skill2',...]
+   - Do NOT use ILIKE.
+   - Do NOT use text ARRAY overlap.
+   - Do NOT cast unless necessary. If casting is needed, use:
+       tags::jsonb ?| ARRAY['Skill1','Skill2']
+         
+Yêu cầu Output:
+- BẮT BUỘC trả về JSON thuần túy, KHÔNG dùng markdown (```json)
+- Chỉ output valid JSON object, không text thừa
+- Sử dụng đúng tên bảng và cột từ schema
+- Validate logic aggregation theo phân tích chi tiết
+
+Output JSON format:
+{{
+  "sql": "SQL query",
+}}
+

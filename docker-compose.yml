@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  rag-app:
+    container_name: rag-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: rag-database-app:latest
+    ports:
+      - "8045:8045"
+    environment:
+      - LLM_KEY=${OPENAI_API_KEY}
+      - LLM_MODEL=${LLM_MODEL:-gpt-4o-mini}
+      - LLM_TEMPERATURE=${LLM_TEMPERATURE:-0}
+      - LLM_BASE_URL=${LLM_BASE_URL}
+      - EMBEDDING_KEY=${EMBEDDING_KEY:-${OPENAI_API_KEY}}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - GOOGLE_SEARCH_ENGINE_ID=${GOOGLE_SEARCH_ENGINE_ID}
+      - PYTHONUNBUFFERED=1
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

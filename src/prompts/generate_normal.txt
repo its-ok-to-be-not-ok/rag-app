@@ -1,0 +1,46 @@
+Sinh SQL query chính xác từ câu hỏi tự nhiên và trả về kết quả dưới dạng JSON.
+
+Input:
+- Thời gian hiện tại: {current_time}
+- Câu hỏi: {question}
+- Schema chi tiết: {table_schemas}
+- Phân tích chi tiết (joins, conditions, order):
+{analysis_context}
+- Các query tương tự từ database (RAG): {similar_examples}
+
+QUY TẮC QUAN TRỌNG:
+
+1. **CHỈ SỬ DỤNG CÁC CỘT CÓ TRONG SCHEMA**:
+   - PHẢI kiểm tra schema trước khi dùng bất kỳ column nào
+   - KHÔNG BAO GIỜ giả định column tồn tại (ví dụ: created_at, updated_at)
+   - Nếu không chắc column có tồn tại → KHÔNG dùng ORDER BY hoặc dùng column id
+
+2. **Xử lý câu hỏi mơ hồ về jobs**:
+   - Nếu người dùng hỏi "tôi có thể làm công việc gì", "job nào phù hợp", "what job can I do" mà KHÔNG có skills cụ thể → Trả về TẤT CẢ jobs: SELECT * FROM public.jobs LIMIT 50
+   - Nếu người dùng cung cấp skills cụ thể → Dùng tags::jsonb ?| ARRAY['skill1', 'skill2']
+   - KHÔNG BAO GIỜ dùng placeholder như 'Skill1', 'Skill2' - nếu không có skills cụ thể, trả về tất cả jobs
+
+3. **Table Selection**:
+   - Job data → public.jobs table
+   - Chỉ JOIN khi thực sự cần, tránh JOIN thừa
+
+4. **Column Names**:
+   - Sử dụng CHÍNH XÁC tên cột từ schema (case-sensitive)
+   - KHÔNG đoán tên cột - phải có trong schema
+
+5. **Skill Matching** (CHỈ khi có skills cụ thể):
+   - Column "tags" in table "public.jobs" is JSON/JSONB.
+   - Dùng format: tags::jsonb ?| ARRAY['Python','NodeJS',...]
+   - KHÔNG dùng ILIKE
+   - KHÔNG dùng placeholder skills
+
+Yêu cầu Output:
+- BẮT BUỘC trả về JSON thuần túy, KHÔNG dùng markdown (```json)
+- Chỉ output valid JSON object, không text thừa
+- Sử dụng ĐÚNG tên bảng và cột từ schema - KHÔNG dùng column không có trong schema
+
+Output JSON format:
+{{
+  "sql": "SQL query",
+}}
+
