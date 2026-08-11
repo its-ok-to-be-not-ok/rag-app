@@ -196,24 +196,70 @@ async def upload_schema(file: UploadFile = File(...)):
 
 @app.get("/projects")
 async def list_projects():
+    """
+    List all projects strictly from Qdrant Vector DB to verify actual persistent data.
+    (Giữ lại logic RAM cũ dưới dạng comment để sử dụng sau này nếu cần)
+    """
     try:
         project_list = []
-        # cached_ids = getattr(app.state, "existing_project_ids", set())
-        
-        # if not cached_ids:
         vector_service = VectorService()
-        cached_ids = set(vector_service.get_all_project_ids())
-        app.state.existing_project_ids = cached_ids
+        
+        # --------------------------------------------------------------------------
+        # [LOGIC CŨ: ĐỌC METADATA TỪ RAM CACHE] - Giữ lại để tham khảo / bật lại sau
+        # --------------------------------------------------------------------------
+        # cached_ids = getattr(app.state, "existing_project_ids", set())
+        # if not cached_ids:
+        #     cached_ids = set(vector_service.get_all_project_ids())
+        #     app.state.existing_project_ids = cached_ids
+        #
+        # for project_id in sorted(list(cached_ids)):
+        #     metadata = projects.get(project_id, {}).get("metadata", {
+        #         "source": "qdrant_storage",
+        #         "status": "ready"
+        #     })
+        #     project_list.append({
+        #         "project_id": project_id,
+        #         "metadata": metadata
+        #     })
+        # --------------------------------------------------------------------------
 
-        for project_id in sorted(list(cached_ids)):
-            metadata = projects.get(project_id, {}).get("metadata", {
-                "source": "qdrant_storage",
-                "status": "ready"
-            })
+        # --------------------------------------------------------------------------
+        # [LOGIC MỚI: TRUY VẤN STRICTC 100% TỪ QDRANT VECTOR DB]
+        # --------------------------------------------------------------------------
+        # 1. Quét toàn bộ project_id trực tiếp từ các collection trong Qdrant
+        qdrant_project_ids = vector_service.get_all_project_ids()
+        
+        # Cập nhật lại in-memory state
+        app.state.existing_project_ids = set(qdrant_project_ids)
+
+        # 2. Duyệt qua từng project_id và đọc danh sách bảng thực tế lưu trong Qdrant Payload
+        for project_id in qdrant_project_ids:
+            proj_vector_service = VectorService(project_id=project_id)
             
+            # Scroll lấy dữ liệu payload thực tế từ schema collection
+            scroll_res = proj_vector_service.client.scroll(
+                collection_name=proj_vector_service.schema_collection,
+                limit=500,
+                with_payload=True
+            )
+            points = scroll_res[0] if scroll_res else []
+            
+            # Đếm số bảng hợp lệ thực sự được lưu trong Qdrant
+            table_names = set()
+            for pt in points:
+                payload = pt.payload or {}
+                t_name = payload.get("table_name") or payload.get("full_name")
+                if t_name:
+                    table_names.add(t_name)
+
             project_list.append({
                 "project_id": project_id,
-                "metadata": metadata
+                "metadata": {
+                    "source": "qdrant_storage",
+                    "status": "persisted_in_qdrant" if len(table_names) > 0 else "empty_vessel_warning",
+                    "total_tables_in_qdrant": len(table_names),
+                    "tables": list(table_names)
+                }
             })
         
         return JSONResponse(
@@ -225,7 +271,10 @@ async def list_projects():
             }
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to list projects: {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Failed to list projects from Qdrant: {str(e)}"
+        )
 
 @app.get("/projects/{project_id}")
 async def get_project(project_id: str):
