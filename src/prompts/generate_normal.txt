@@ -34,9 +34,16 @@ QUY TẮC QUAN TRỌNG:
    - KHÔNG dùng ILIKE
    - KHÔNG dùng placeholder skills
 
-6. **Location Matching**:
-   - Địa điểm (location): Dùng ILIKE để tìm kiếm mềm (ví dụ: location ILIKE '%Hà Nội%').
-
+6. **Location Matching**::
+   - BẮT BUỘC dùng toán tử `ILIKE '%...%'` để tìm kiếm chứa chuỗi, không phân biệt hoa/thường.
+   - XỬ LÝ KHÔNG DẤU & VIẾT TẮT:
+   Khi tìm kiếm một địa điểm, BẮT BUỘC phải mở rộng điều kiện bằng `OR` bao gồm cả tiếng Việt có dấu, tiếng Việt KHÔNG DẤU và TỪ VIẾT TẮT phổ biến.  
+   Ví dụ mẫu:
+   - Hà Nội: (location ILIKE '%Hà Nội%' OR location ILIKE '%Ha Noi%' OR location ILIKE '%HN%')
+   - Hồ Chí Minh / TPHCM / Sài Gòn: (location ILIKE '%Hồ Chí Minh%' OR location ILIKE '%Ho Chi Minh%' OR location ILIKE '%HCM%' OR location ILIKE '%Sài Gòn%' OR location ILIKE '%Sai Gon%')
+   - Đà Nẵng: (location ILIKE '%Đà Nẵng%' OR location ILIKE '%Da Nang%' OR location ILIKE '%DN%')
+   - Bình Dương: (location ILIKE '%Bình Dương%' OR location ILIKE '%Binh Duong%')
+   - Cần Thơ: (location ILIKE '%Cần Thơ%' OR location ILIKE '%Can Tho%')
 Yêu cầu Output:
 - BẮT BUỘC trả về JSON thuần túy, KHÔNG dùng markdown (```json)
 - Chỉ output valid JSON object, không text thừa
