@@ -17,13 +17,20 @@ QUY TẮC QUAN TRỌNG:
      + Ví dụ: `WHERE public.resumes.user_id = :user_id` hoặc `WHERE public.users.id = :user_id`
      + TUYỆT ĐỐI KHÔNG DÙNG các biến thể khác như: `:current_user_id`, `CURRENT_USER_ID`, `'user_uuid'`, `'your_user_id'`, hay `'user_id_của_bạn'`. Nếu dùng sai, hệ thống Backend sẽ vỡ do không parse được session.
 
-2. **Table Selection**:
+2. **CHỈ SỬ DỤNG CÁC CỘT CÓ TRONG SCHEMA**:
+   - PHẢI kiểm tra schema trước khi dùng bất kỳ column nào
+   - KHÔNG BAO GIỜ giả định column tồn tại (ví dụ: created_at, updated_at)
+   - Nếu không chắc column có tồn tại → KHÔNG dùng ORDER BY hoặc dùng column id     
+
+3. **Table Selection**:
    - Chỉ JOIN khi thực sự cần, tránh JOIN thừa
+   - Job data → public.jobs table
 
-3. **Column Names**:
+4. **Column Names**:
    - Sử dụng chính xác tên cột từ schema (case-sensitive)
+   - KHÔNG đoán tên cột - phải có trong schema
 
-4. Skill Matching (CRITICAL — follow exactly):
+5. Skill Matching (CRITICAL — follow exactly):
    - Column "tags" in table "public.jobs" is JSON/JSONB.
    - ALWAYS use this format for skill matching:
        tags ?| ARRAY['Skill1','Skill2',...]
@@ -31,6 +38,17 @@ QUY TẮC QUAN TRỌNG:
    - Do NOT use text ARRAY overlap.
    - Do NOT cast unless necessary. If casting is needed, use:
        tags::jsonb ?| ARRAY['Skill1','Skill2']
+
+6. **Location Matching**::
+   - BẮT BUỘC dùng toán tử `ILIKE '%...%'` để tìm kiếm chứa chuỗi, không phân biệt hoa/thường.
+   - XỬ LÝ KHÔNG DẤU & VIẾT TẮT:
+   Khi tìm kiếm một địa điểm, BẮT BUỘC phải mở rộng điều kiện bằng `OR` bao gồm cả tiếng Việt có dấu, tiếng Việt KHÔNG DẤU và TỪ VIẾT TẮT phổ biến.  
+   Ví dụ mẫu:
+   - Hà Nội: (location ILIKE '%Hà Nội%' OR location ILIKE '%Ha Noi%' OR location ILIKE '%HN%')
+   - Hồ Chí Minh / TPHCM / Sài Gòn: (location ILIKE '%Hồ Chí Minh%' OR location ILIKE '%Ho Chi Minh%' OR location ILIKE '%HCM%' OR location ILIKE '%Sài Gòn%' OR location ILIKE '%Sai Gon%')
+   - Đà Nẵng: (location ILIKE '%Đà Nẵng%' OR location ILIKE '%Da Nang%' OR location ILIKE '%DN%')
+   - Bình Dương: (location ILIKE '%Bình Dương%' OR location ILIKE '%Binh Duong%')
+   - Cần Thơ: (location ILIKE '%Cần Thơ%' OR location ILIKE '%Can Tho%')
          
 Yêu cầu Output:
 - BẮT BUỘC trả về JSON thuần túy, KHÔNG dùng markdown (```json)
