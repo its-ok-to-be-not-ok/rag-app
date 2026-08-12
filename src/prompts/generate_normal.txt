@@ -44,6 +44,7 @@ QUY TẮC QUAN TRỌNG:
    - Đà Nẵng: (location ILIKE '%Đà Nẵng%' OR location ILIKE '%Da Nang%' OR location ILIKE '%DN%')
    - Bình Dương: (location ILIKE '%Bình Dương%' OR location ILIKE '%Binh Duong%')
    - Cần Thơ: (location ILIKE '%Cần Thơ%' OR location ILIKE '%Can Tho%')
+   
 Yêu cầu Output:
 - BẮT BUỘC trả về JSON thuần túy, KHÔNG dùng markdown (```json)
 - Chỉ output valid JSON object, không text thừa
