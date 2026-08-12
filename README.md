@@ -94,13 +94,15 @@ graph TD
     CheckSize["❓ Schema Word Count<br/>>= Threshold?"]
     
     RetrieveSchema["📂 1. Node: retrieve_schema<br/>
-Search 5 bảng qua Vector DB"]
+Tìm 5 bảng liên quan
+qua Vector DB"]
     
     AnalyzeSchema["🧠 2. Node: analyze_schema<br/>
 LLM phân tích JOIN paths"]
     
     RetrieveRAG["🗄️ 3. Node: retrieve_rag<br/>
-Search SQL tương tự"]
+Lấy các example SQL tương
+tự trong Vector DB"]
     
     GenerateSQL["📊 4. Node: generate_sql<br/>
 Sinh SQL & Chart Type"]
@@ -109,9 +111,9 @@ Sinh SQL & Chart Type"]
 Trả về kết quả"]
 
     Start --> CheckSize
-    CheckSize -->|"Co (Schema qua lon)"| RetrieveSchema
+    CheckSize -->|"Có (Schema qua lon)"| RetrieveSchema
     RetrieveSchema --> AnalyzeSchema
-    CheckSize -->|"Khong (Schema nho)"| AnalyzeSchema
+    CheckSize -->|"Không (Schema nho)"| AnalyzeSchema
     
     AnalyzeSchema --> RetrieveRAG
     RetrieveRAG --> GenerateSQL
